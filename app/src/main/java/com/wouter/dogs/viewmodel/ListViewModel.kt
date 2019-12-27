@@ -40,11 +40,22 @@ class ListViewModel(application: Application) : BaseViewModel(application) {
     }
 
     private fun fetchFromDatabase() {
+        checkCacheDuration()
         loading.value = true
         launch {
             val dogs = DogDatabase(getApplication()).dogDao().getAllDogs()
             dogsRetrieved(dogs)
             Toast.makeText(getApplication(), "Dogs from db", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun checkCacheDuration() {
+        val cachePreference = prefHelper.getCacheDuration()
+        try {
+            val cachePreferenceInt = cachePreference?.toInt() ?: 5*60
+            refreshTime = cachePreferenceInt.times(1000 * 1000 * 1000).toLong()
+        } catch (e: NumberFormatException) {
+            e.printStackTrace()
         }
     }
 
